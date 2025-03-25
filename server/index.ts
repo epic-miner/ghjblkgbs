@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { securityMiddleware, scraperDetectionMiddleware } from './lib/security'; // Added import for scraperDetectionMiddleware
 
 const app = express();
 app.use(express.json());
@@ -39,6 +40,10 @@ app.use((req, res, next) => {
   });
   next();
 });
+
+// Apply security middleware
+app.use(scraperDetectionMiddleware); // Added scraperDetectionMiddleware
+app.use(securityMiddleware);
 
 (async () => {
   const server = await registerRoutes(app);
