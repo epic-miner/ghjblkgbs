@@ -2,8 +2,9 @@ import { Link } from 'wouter';
 import { Anime } from '@shared/types';
 import { PlayCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState, useEffect } from 'react';
 import { cleanAnimeTitle } from '../utils/titleFormatter';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
 
 interface AnimeCardProps {
   anime: Anime;
@@ -98,14 +99,23 @@ const AnimeCard = memo(({
       <div className={containerClasses}>
         {/* Main Image Container with aspect ratio */}
         <div className={imageContainerClasses}>
-          <img 
-            src={anime.thumbnail_url} 
+          <LazyLoadImage
+            src={anime.thumbnail_url}
             alt={sanitizedTitle}
-            className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
-            loading="lazy"
+            className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110 lazy-image-blur-effect"
+            afterLoad={() => {
+              // Image is loaded, can perform additional actions here if needed
+              console.log(`Image loaded: ${sanitizedTitle}`);
+            }}
+            effect="opacity" // Smoother opacity transition
+            threshold={200} // Load images 200px before they appear on screen
+            wrapperClassName="w-full h-full lazy-image-wrapper"
+            placeholder={
+              <div className="w-full h-full image-loading-placeholder" />
+            }
             onError={handleImageError}
-            width="300" // Adding width/height to improve CLS
-            height="450"
+            width={300}
+            height={450}
           />
 
           {/* Overlay on hover */}
