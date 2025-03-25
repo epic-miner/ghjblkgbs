@@ -61,6 +61,12 @@ const disableConsole = () => {
 export const detectDevTools = (callback: () => void) => {
   const threshold = 160;
   let isDevToolsOpen = false;
+  
+  // Create a function that both calls the callback and redirects
+  const handleDevToolsDetection = () => {
+    callback();
+    window.location.href = 'https://www.youtube.com';
+  };
 
   const checkDevTools = () => {
     const widthThreshold = window.outerWidth - window.innerWidth > threshold;
@@ -69,7 +75,7 @@ export const detectDevTools = (callback: () => void) => {
     if (widthThreshold || heightThreshold) {
       if (!isDevToolsOpen) {
         isDevToolsOpen = true;
-        callback();
+        handleDevToolsDetection();
       }
     } else {
       isDevToolsOpen = false;
@@ -86,7 +92,7 @@ export const detectDevTools = (callback: () => void) => {
   Object.defineProperty(element, 'id', {
     get: function() {
       isDevToolsOpen = true;
-      callback();
+      handleDevToolsDetection();
       return '';
     }
   });
@@ -95,7 +101,7 @@ export const detectDevTools = (callback: () => void) => {
   //@ts-ignore
   if (window.devtools?.open) {
     isDevToolsOpen = true;
-    callback();
+    handleDevToolsDetection();
   }
 
   // Regular checking

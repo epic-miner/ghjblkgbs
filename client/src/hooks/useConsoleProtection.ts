@@ -9,6 +9,7 @@ export const useConsoleProtection = () => {
 
     const createBlocker = () => {
       if (!blockerDiv) {
+        // Display blocker briefly before redirect
         blockerDiv = document.createElement('div');
         blockerDiv.style.position = 'fixed';
         blockerDiv.style.top = '0';
@@ -22,8 +23,13 @@ export const useConsoleProtection = () => {
         blockerDiv.style.justifyContent = 'center';
         blockerDiv.style.color = 'white';
         blockerDiv.style.fontSize = '20px';
-        blockerDiv.textContent = 'Website access restricted - Developer tools detected';
+        blockerDiv.textContent = 'Website access restricted - Redirecting...';
         document.body.appendChild(blockerDiv);
+        
+        // Redirect to YouTube after a brief delay
+        setTimeout(() => {
+          window.location.href = 'https://www.youtube.com';
+        }, 1000);
       }
     };
 

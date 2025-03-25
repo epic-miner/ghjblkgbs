@@ -3,16 +3,24 @@ import devtoolsDetect from 'devtools-detect';
 import DisableDevtool from 'disable-devtool';
 
 export const setupEnhancedDevToolsProtection = (onDetected: () => void = () => {}) => {
+  const redirectToYoutube = () => {
+    // Call any custom handler first if provided
+    onDetected();
+    
+    // Then redirect to YouTube
+    window.location.href = 'https://www.youtube.com';
+  };
+
   // Use devtools-detect package
   window.addEventListener('devtoolschange', (event: any) => {
     if (event.detail.isOpen) {
-      onDetected();
+      redirectToYoutube();
     }
   });
 
   // Use disable-devtool package with advanced options
   DisableDevtool({
-    ondevtoolopen: onDetected,
+    ondevtoolopen: redirectToYoutube,
     interval: 1000,
     disableMenu: true,
     disableSelect: true,
