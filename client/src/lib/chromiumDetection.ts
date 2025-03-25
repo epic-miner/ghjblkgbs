@@ -1,4 +1,3 @@
-
 /**
  * Specialized module for detecting DevTools in Chromium-based browsers
  * Works with Chrome, Edge, Opera, Brave, and other Chromium browsers
@@ -6,146 +5,100 @@
 import axios from 'axios';
 
 export const setupChromiumDetection = (callback: () => void) => {
-  let detectionActive = true;
-  let devToolsDetected = false;
-  
-  // Method 1: Debugger statement detection with improved accuracy
-  const debuggerCheck = () => {
-    try {
-      const start = new Date().getTime();
-      
-      // This debugger statement will pause execution if DevTools is open
-      debugger;
-      
-      const end = new Date().getTime();
-      // Only trigger if time difference is significant (DevTools open)
-      if (end - start > 100 && !devToolsDetected) {
-        devToolsDetected = true;
-        callback();
-        return true;
-      }
-    } catch (e) {
-      // Silently fail
-    }
-    return false;
-  };
-  
-  // Method 2: Element dimension examination with higher precision
-  const elementSizeCheck = () => {
-    const element = document.createElement('div');
-    element.style.width = '1px';
-    element.style.height = '1px';
-    element.style.position = 'fixed';
-    element.style.bottom = '0';
-    element.style.right = '0';
-    document.body.appendChild(element);
-    
-    // In Chromium browsers, element dimensions change when DevTools is open
-    const width = element.offsetWidth;
-    const height = element.offsetHeight;
-    document.body.removeChild(element);
-    
-    if ((width !== 1 || height !== 1) && !devToolsDetected) {
-      devToolsDetected = true;
-      callback();
-      return true;
-    }
-    
-    return false;
-  };
-  
-  // Method 3: Console timing with improved thresholds
-  const consoleTimingCheck = () => {
-    const start = performance.now();
-    console.clear();
-    const end = performance.now();
-    
-    // Chromium browsers have significantly different timing when DevTools is open
-    if (end - start > 20 && !devToolsDetected) {
-      devToolsDetected = true;
-      callback();
-      return true;
-    }
-    
-    return false;
-  };
-  
-  // Method 4: Specific Chromium objects with more detailed checking
-  const chromiumObjectsCheck = () => {
-    // @ts-ignore
-    if (window.chrome && (window.chrome.loadTimes || window.chrome.csi)) {
-      // Create a test object with a getter that has side effects
-      const testObject = document.createElement('div');
-      let devToolsOpened = false;
-      
-      Object.defineProperty(testObject, 'id', {
-        get: function() {
-          devToolsOpened = true;
-          return 'chromium-check';
+  const YOUTUBE_REDIRECT_URL = 'https://www.youtube.com';
+  let devToolsOpen = false;
+
+  // Main detection function
+  const detectDevTools = () => {
+    // Specific Chrome/Chromium detection using debugger trick
+    const element = new Image();
+
+    Object.defineProperty(element, 'id', {
+      get: function() {
+        devToolsOpen = true;
+
+        // Notify server about detection
+        try {
+          axios.post('/api/security/devtools-detection', {
+            devToolsOpen: true,
+            browser: 'chromium',
+            timestamp: Date.now(),
+            token: localStorage.getItem('security_token') || ''
+          }).catch(() => {});
+        } catch (e) {
+          // Silent fail
         }
-      });
-      
-      console.log(testObject);
-      console.clear();
-      
-      if (devToolsOpened && !devToolsDetected) {
-        devToolsDetected = true;
+
+        // Clear sensitive data
+        clearBrowserData();
+
+        // Execute callback
         callback();
-        return true;
+
+        // Redirect to YouTube
+        window.location.href = YOUTUBE_REDIRECT_URL;
+
+        return '';
       }
-    }
-    
-    return false;
+    });
+
+    // Trigger detection
+    console.log(element);
   };
-  
-  // Method 5: Dev tools orientation detection
-  const orientationCheck = () => {
-    const isHorizontal = window.outerWidth - window.innerWidth > 160;
-    const isVertical = window.outerHeight - window.innerHeight > 160;
-    
-    if ((isHorizontal || isVertical) && !devToolsDetected) {
-      devToolsDetected = true;
+
+  // Clear sensitive browser data
+  const clearBrowserData = () => {
+    // Clear localStorage except for critical items
+    const criticalItems = ['security_token'];
+    Object.keys(localStorage).forEach(key => {
+      if (!criticalItems.includes(key)) {
+        localStorage.removeItem(key);
+      }
+    });
+
+    // Clear sessionStorage
+    sessionStorage.clear();
+
+    // Remove cached elements
+    const elements = document.querySelectorAll('video, .video-container, .player-wrapper, .sensitive-data');
+    elements.forEach(el => {
+      if (el instanceof HTMLElement) {
+        el.style.display = 'none';
+        el.innerHTML = '';
+      } else if (el instanceof HTMLVideoElement) {
+        el.pause();
+        el.src = '';
+        el.load();
+      }
+    });
+
+    // Remove any dynamic scripts that might contain sensitive data
+    const scripts = document.querySelectorAll('script[data-dynamic="true"]');
+    scripts.forEach(script => {
+      script.remove();
+    });
+  };
+
+  // Initial check
+  detectDevTools();
+
+  // Run checks periodically
+  setInterval(detectDevTools, 1000);
+
+  // Listen for specific events that might indicate devtools
+  window.addEventListener('resize', () => {
+    // Check if window dimensions suggest devtools is open
+    const widthDiff = window.outerWidth - window.innerWidth;
+    const heightDiff = window.outerHeight - window.innerHeight;
+
+    if (widthDiff > 200 || heightDiff > 200) {
+      devToolsOpen = true;
       callback();
-      return true;
+      window.location.href = YOUTUBE_REDIRECT_URL;
     }
-    
-    return false;
-  };
-  
-  // Run all detection methods periodically
-  const runDetection = () => {
-    if (!detectionActive) return;
-    
-    const detected = debuggerCheck() || 
-                     elementSizeCheck() ||
-                     consoleTimingCheck() || 
-                     chromiumObjectsCheck() ||
-                     orientationCheck();
-    
-    // Only keep checking if not yet detected
-    if (detected) {
-      // Reduce check frequency once detected to avoid performance impact
-      detectionActive = false;
-      setTimeout(() => {
-        detectionActive = true;
-      }, 10000); // Check again after 10 seconds
-    }
-  };
-  
-  // Initial detection
-  runDetection();
-  
-  // Periodic checks
-  const detectionInterval = setInterval(() => {
-    runDetection();
-  }, 1000);
-  
-  // Public API to stop detection
+  });
+
   return {
-    stopDetection: () => {
-      detectionActive = false;
-      clearInterval(detectionInterval);
-    },
-    isDevToolsDetected: () => devToolsDetected
+    isDevToolsOpen: () => devToolsOpen
   };
 };

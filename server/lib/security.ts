@@ -1,198 +1,119 @@
-import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
+import { Request, Response, NextFunction } from 'express';
 
-// In-memory store for blocking specific clients
-// In production, use Redis or a shared database
-const blockedClients = new Map<string, number>();
-const clientTokens = new Map<string, string>();
+// Store active sessions and their security status
+const activeSessions: Record<string, {
+  token: string,
+  isBlocked: boolean,
+  timestamp: number,
+  devToolsDetected: boolean
+}> = {};
 
-// Generate a security token for a client session
-export const generateClientToken = (clientId: string): string => {
-  const token = crypto.randomBytes(32).toString('hex');
-  clientTokens.set(clientId, token);
-  return token;
-};
+// Clean up old sessions every 15 minutes
+setInterval(() => {
+  const now = Date.now();
+  const sessionTimeout = 1000 * 60 * 30; // 30 minutes
 
-// Validate that a client's token is legitimate
-export const validateClientToken = (clientId: string, token: string): boolean => {
-  const validToken = clientTokens.get(clientId);
-  return validToken === token;
-};
+  Object.keys(activeSessions).forEach(sessionId => {
+    if (now - activeSessions[sessionId].timestamp > sessionTimeout) {
+      delete activeSessions[sessionId];
+    }
+  });
+}, 1000 * 60 * 15);
 
-// Get client identifier from request
-export const getClientId = (req: Request): string => {
-  const ip = req.ip || req.socket.remoteAddress || '0.0.0.0';
-  const userAgent = req.headers['user-agent'] || 'unknown';
+// Generate security token
+export const generateSecurityToken = (req: Request, res: Response) => {
+  try {
+    const token = crypto.randomBytes(32).toString('hex');
+    const sessionId = req.ip || 'unknown';
 
-  // Create a composite ID
-  return crypto.createHash('sha256')
-    .update(`${ip}-${userAgent}`)
-    .digest('hex');
-};
+    // Save token with session
+    activeSessions[sessionId] = {
+      token,
+      isBlocked: false,
+      timestamp: Date.now(),
+      devToolsDetected: false
+    };
 
-// Block a client from receiving further data
-export const blockClient = (clientId: string, duration: number = 3600000): void => {
-  // Default duration: 1 hour
-  blockedClients.set(clientId, Date.now() + duration);
-};
-
-// Check if a client is blocked
-export const isClientBlocked = (clientId: string): boolean => {
-  const expiryTime = blockedClients.get(clientId);
-
-  if (!expiryTime) {
-    return false;
+    return res.status(200).json({ token });
+  } catch (error) {
+    console.error('Error generating security token:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
-
-  // Check if block has expired
-  if (Date.now() > expiryTime) {
-    blockedClients.delete(clientId);
-    return false;
-  }
-
-  return true;
 };
 
-// Security middleware to check client status
+// Handle dev tools detection
+export const handleDevToolsDetection = (req: Request, res: Response) => {
+  try {
+    const { token, devToolsOpen } = req.body;
+    const sessionId = req.ip || 'unknown';
+
+    // Validate token
+    if (!token || !activeSessions[sessionId] || activeSessions[sessionId].token !== token) {
+      return res.status(403).json({ error: 'Security violation detected' });
+    }
+
+    // Update session status
+    activeSessions[sessionId].devToolsDetected = !!devToolsOpen;
+    activeSessions[sessionId].isBlocked = !!devToolsOpen;
+    activeSessions[sessionId].timestamp = Date.now();
+
+    // Log suspicious activity (in production this could trigger security alerts)
+    console.warn(`DevTools detected for session ${sessionId}. Access restricted.`);
+
+    return res.status(403).json({ error: 'Security violation detected' });
+  } catch (error) {
+    console.error('Error handling dev tools detection:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Security middleware to check all protected routes
 export const securityMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const clientId = getClientId(req);
-
-  // Skip security check for security endpoints
+  // Skip security checks for security endpoints themselves
   if (req.path.startsWith('/api/security')) {
     return next();
   }
 
-  // Check if client is blocked
-  if (isClientBlocked(clientId)) {
-    return res.status(403).json({
-      error: 'Access denied',
-      message: 'Your session has been terminated for security reasons.'
-    });
+  const sessionId = req.ip || 'unknown';
+
+  // Check if session is blocked
+  if (activeSessions[sessionId] && activeSessions[sessionId].isBlocked) {
+    return res.status(403).json({ error: 'Access denied for security reasons' });
   }
+
+  // Pass the connection state to the frontend
+  res.setHeader('X-Security-Status', 'protected');
 
   next();
 };
 
-const disableConsole = () => {
-  const noop = () => undefined;
-  const methods = ['log', 'debug', 'info', 'warn', 'error', 'table', 'trace', 'profile', 'profileEnd'];
+// Extended security scan middleware (for sensitive routes)
+export const enhancedSecurityScan = (req: Request, res: Response, next: NextFunction) => {
+  const sessionId = req.ip || 'unknown';
+  const token = req.headers['x-security-token'] || req.query.token;
 
-  // Save original console methods for our own use
-  const originalConsole = {
-    warn: console.warn,
-    error: console.error
-  };
-
-  // Override all console methods
-  methods.forEach(method => {
-    console[method] = noop;
-  });
-
-  // Add warning for console access with browser detection
-  const showWarning = () => {
-    // Detect if using Chromium-based browser
-    const isChromium = () => {
-      // @ts-ignore
-      return !!window.chrome || /Chrome/.test(navigator.userAgent);
-    };
-
-    // @ts-ignore
-    const isEdge = /Edg/.test(navigator.userAgent);
-
-    let browserWarning = '';
-    if (isChromium()) {
-      browserWarning = isEdge ? 'Edge' : 'Chrome';
-    }
-
-    originalConsole.warn(
-      '%cStop!', 
-      'color: red; font-size: 30px; font-weight: bold;'
-    );
-    originalConsole.warn(
-      `%cThis is a security feature of our video player. ${browserWarning ? `${browserWarning} ` : ''}Console access is restricted.`,
-      'color: red; font-size: 16px;'
-    );
-    originalConsole.warn(
-      '%cAttempting to bypass security measures is prohibited.',
-      'color: red; font-size: 16px;'
-    );
-  };
-
-  // Periodically clear console and show warning
-  setInterval(() => {
-    console.clear();
-    showWarning();
-  }, 100);
-
-  // Additional protection for Chromium browsers
-  try {
-    // Prevent console.log overrides
-    Object.defineProperty(console, '_commandLineAPI', {
-      get: function() {
-        showWarning();
-        throw new Error('Console API access denied');
-      }
-    });
-
-    // Chromium specific protection
-    const originalDesc = Object.getOwnPropertyDescriptor(window, 'console');
-    if (originalDesc) {
-      Object.defineProperty(window, 'console', {
-        get: function() {
-          return {
-            log: noop,
-            debug: noop,
-            info: noop,
-            warn: noop,
-            error: noop,
-            table: noop,
-            trace: noop,
-            time: noop,
-            timeEnd: noop,
-            profile: noop,
-            profileEnd: noop,
-            clear: noop
-          };
-        },
-        set: function() {
-          return false;
-        },
-        configurable: false
-      });
-    }
-  } catch (e) {
-    // Silent fail for unsupported browsers
+  // Validate session token for sensitive routes
+  if (!token || !activeSessions[sessionId] || activeSessions[sessionId].token !== token) {
+    return res.status(403).json({ error: 'Enhanced security check failed' });
   }
+
+  // Update session timestamp
+  activeSessions[sessionId].timestamp = Date.now();
+
+  next();
 };
 
-export const preventKeyboardShortcuts = () => {
-  // Use capture phase to intercept events before they reach other handlers
-  window.addEventListener('keydown', (e: KeyboardEvent) => {
-    // Prevent F12
-    if (e.key === 'F12') {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
+// Get session security status (for internal use)
+export const getSessionStatus = (sessionId: string) => {
+  return activeSessions[sessionId] || { isBlocked: false, devToolsDetected: false };
+};
 
-    // Prevent ALL dev tools keyboard shortcuts
-    if (e.ctrlKey && e.shiftKey && (
-        e.key === 'I' || e.key === 'i' || // Chrome, Firefox, Edge Inspector
-        e.key === 'J' || e.key === 'j' || // Chrome Console
-        e.key === 'C' || e.key === 'c' || // Chrome Elements
-        e.key === 'K' || e.key === 'k' || // Chrome Network
-        e.key === 'M' || e.key === 'm'    // Chrome Developer Tools (general)
-      )) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
-
-    // Prevent Safari dev tools (Cmd+Opt+I)
-    if ((e.metaKey || e.ctrlKey) && e.altKey && (e.key === 'I' || e.key === 'i')) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
-  }, true);
+// Block specific session
+export const blockSession = (sessionId: string) => {
+  if (activeSessions[sessionId]) {
+    activeSessions[sessionId].isBlocked = true;
+    return true;
+  }
+  return false;
 };
