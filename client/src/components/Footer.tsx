@@ -61,7 +61,7 @@ const Footer: React.FC = () => {
             <h3 className="text-lg font-semibold mb-4 text-primary">Connect With Us</h3>
             <div className="flex items-center gap-4">
               <motion.a 
-                href="https://twitter.com" 
+                href="https://x.com/9AnimeOfficial?t=g-WLtTKMcFKNou4Gfhx6tg&s=09" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="bg-gray-800 hover:bg-primary p-3 rounded-full text-gray-300 hover:text-white transition-all duration-200 transform hover:scale-110"
@@ -79,7 +79,7 @@ const Footer: React.FC = () => {
                 <FaTelegram size={20} />
               </motion.a>
               <motion.a 
-                href="https://instagram.com" 
+                href="https://www.instagram.com/9anime_official?igsh=dGh4eDh6dWs3bGM4" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="bg-gray-800 hover:bg-primary p-3 rounded-full text-gray-300 hover:text-white transition-all duration-200 transform hover:scale-110"
@@ -88,7 +88,7 @@ const Footer: React.FC = () => {
                 <FaInstagram size={20} />
               </motion.a>
               <motion.a 
-                href="https://discord.com" 
+                href="https://discord.gg/q9D44eGeES" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="bg-gray-800 hover:bg-primary p-3 rounded-full text-gray-300 hover:text-white transition-all duration-200 transform hover:scale-110"
