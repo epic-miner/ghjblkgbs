@@ -25,6 +25,22 @@ const sectionVariants = {
   }
 };
 
+// Optimized skeleton loader for better performance
+const OptimizedSkeletonLoader = ({ count = 3 }: { count?: number }) => {
+  return (
+    <>
+      {Array(count).fill(0).map((_, i) => (
+        <div key={i} className="rounded-xl overflow-hidden bg-dark-800/60 shadow-md border border-dark-700/30">
+          <Skeleton className="aspect-[2/3] w-full rounded-t-xl animate-pulse" />
+          <div className="p-3">
+            <Skeleton className="h-4 w-3/4 mb-2 rounded-md animate-pulse" />
+          </div>
+        </div>
+      ))}
+    </>
+  );
+};
+
 // Section title component for consistent styling
 const SectionTitle = ({ icon, title, viewAllLink, viewAllText = 'View All' }: { 
   icon: string, 
@@ -299,15 +315,7 @@ const Home = () => {
 
           <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {isLoadingAnime ? (
-              Array(6).fill(0).map((_, i) => (
-                <div key={i} className="rounded-xl overflow-hidden bg-dark-800/60 shadow-md border border-dark-700/30">
-                  <Skeleton className="aspect-[2/3] w-full rounded-t-xl" />
-                  <div className="p-3">
-                    <Skeleton className="h-4 w-3/4 mb-2 rounded-md" />
-                    <Skeleton className="h-3 w-1/2 rounded-md" />
-                  </div>
-                </div>
-              ))
+              <OptimizedSkeletonLoader count={6} />
             ) : (
               finalTrendingAnime.slice(0, 6).map((anime, index) => (
                 <motion.div
@@ -347,15 +355,7 @@ const Home = () => {
 
           <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {isLoadingAnime ? (
-              Array(6).fill(0).map((_, i) => (
-                <div key={i} className="rounded-xl overflow-hidden bg-dark-800/60 shadow-md border border-dark-700/30">
-                  <Skeleton className="aspect-[2/3] w-full rounded-t-xl" />
-                  <div className="p-3">
-                    <Skeleton className="h-4 w-3/4 mb-2 rounded-md" />
-                    <Skeleton className="h-3 w-1/2 rounded-md" />
-                  </div>
-                </div>
-              ))
+              <OptimizedSkeletonLoader count={6} />
             ) : (
               finalLatestReleasedAnime.slice(0, 6).map((anime, index) => (
                 <motion.div
@@ -395,15 +395,7 @@ const Home = () => {
 
           <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {isLoadingAnime ? (
-              Array(6).fill(0).map((_, i) => (
-                <div key={i} className="rounded-xl overflow-hidden bg-dark-800/60 shadow-md border border-dark-700/30">
-                  <Skeleton className="aspect-[2/3] w-full rounded-t-xl" />
-                  <div className="p-3">
-                    <Skeleton className="h-4 w-3/4 mb-2 rounded-md" />
-                    <Skeleton className="h-3 w-1/2 rounded-md" />
-                  </div>
-                </div>
-              ))
+              <OptimizedSkeletonLoader count={6} />
             ) : (
               finalPopularAnime.slice(0, 6).map((anime, index) => (
                 <motion.div
@@ -443,15 +435,7 @@ const Home = () => {
 
           <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {isLoadingAnime ? (
-              Array(6).fill(0).map((_, i) => (
-                <div key={i} className="rounded-xl overflow-hidden bg-dark-800/60 shadow-md border border-dark-700/30">
-                  <Skeleton className="aspect-[2/3] w-full rounded-t-xl" />
-                  <div className="p-3">
-                    <Skeleton className="h-4 w-3/4 mb-2 rounded-md" />
-                    <Skeleton className="h-3 w-1/2 rounded-md" />
-                  </div>
-                </div>
-              ))
+              <OptimizedSkeletonLoader count={6} />
             ) : (
               finalAllAnime.slice(0, 6).map((anime: Anime, index: number) => (
                 <motion.div
@@ -497,8 +481,8 @@ const Home = () => {
               className="flex flex-nowrap gap-2 min-w-max"
             >
               {isLoadingAnime ? (
-                Array(10).fill(0).map((_, i) => (
-                  <Skeleton key={i} className="h-9 w-24 rounded-full" />
+                Array(6).fill(0).map((_, i) => (
+                  <Skeleton key={i} className="h-9 w-24 rounded-full animate-pulse" />
                 ))
               ) : (
                 genres.slice(0, 20).map((genre, index) => (
@@ -517,8 +501,8 @@ const Home = () => {
 
           <div className="hidden md:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
             {isLoadingAnime ? (
-              Array(6).fill(0).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full rounded-xl" />
+              Array(4).fill(0).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full rounded-xl animate-pulse" />
               ))
             ) : (
               genres.slice(0, 12).map((genre, index) => (
