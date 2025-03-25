@@ -15,13 +15,21 @@ import ConfettiEffect from '../components/ConfettiEffect';
 import LottieLoader from '../components/LottieLoader';
 import { cleanAnimeTitle } from '../utils/titleFormatter';
 
-// Animation variants for sections
+// Check if device is mobile (for initial server-side render compatibility)
+const isMobile = typeof window !== 'undefined' ? 
+  window.innerWidth < 768 || ('ontouchstart' in window) : 
+  false;
+
+// Animation variants for sections - optimized for performance
 const sectionVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: isMobile ? 10 : 20 }, // Smaller movement on mobile
   visible: { 
     opacity: 1, 
     y: 0,
-    transition: { duration: 0.6, ease: "easeOut" }
+    transition: { 
+      duration: isMobile ? 0.3 : 0.6, // Faster on mobile
+      ease: "easeOut" 
+    }
   }
 };
 
@@ -215,9 +223,8 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-800 pb-24 md:pb-8">
-      {/* Animated gradient background for smooth visual experience */}
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-dark-950 via-dark-900/90 to-[#1a103a] opacity-80 animate-gradient-slow bg-size-200"></div>
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent blur-3xl"></div>
+      {/* Static gradient background for better performance */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-dark-950 via-dark-900/90 to-[#1a103a] opacity-80"></div>
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Welcome Banner with AnimatedTitle */}
         <ScrollReveal>
@@ -258,9 +265,12 @@ const Home = () => {
               <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2 md:gap-3">
                 {continueWatching.slice(0, 8).map((item, index) => (
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: isMobile ? 10 : 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    transition={{ 
+                      delay: isMobile ? (index < 3 ? index * 0.05 : 0) : index * 0.1,
+                      duration: isMobile ? 0.3 : 0.5
+                    }}
                     key={`${item.animeId}-${item.episodeId}`}
                     className="transform transition-transform duration-300 hover:scale-105"
                   >

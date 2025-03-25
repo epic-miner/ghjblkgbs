@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import TextTransition, { presets } from 'react-text-transition';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -49,7 +49,20 @@ const AnimatedTitle = ({
     mass = 1
   } = springConfig;
   
-  const springProps = { stiffness, damping, mass };
+  // Detect if device is likely mobile (simplified approach for performance)
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    // Check once on mount if screen is small or if device has touch capability
+    const checkMobile = () => {
+      return window.innerWidth < 768 || ('ontouchstart' in window);
+    };
+    
+    setIsMobile(checkMobile());
+    
+    // Don't add listeners as this would add overhead
+    // We just need a one-time check on component mount
+  }, []);
   
   // For typewriter animation
   const typewriterVariants = {
@@ -59,7 +72,7 @@ const AnimatedTitle = ({
       opacity: 1,
       transition: { 
         delay,
-        duration: 1, 
+        duration: isMobile ? 0.5 : 1, // Faster on mobile
         ease: "easeInOut" 
       }
     }
@@ -75,6 +88,39 @@ const AnimatedTitle = ({
     textFillColor: 'transparent',
   };
   
+  // On mobile devices, use simpler rendering for better performance
+  if (isMobile) {
+    // Static gradient text without animations
+    if (effectiveAnimation === 'gradient') {
+      if (gradient) {
+        return (
+          <Tag className={cn('bg-gradient-to-r bg-clip-text text-transparent', gradient, className)}>
+            {textArray[0]}
+            {children}
+          </Tag>
+        );
+      }
+      
+      return (
+        <Tag className={className} style={gradientStyle}>
+          {textArray[0]}
+          {children}
+        </Tag>
+      );
+    }
+    
+    // No animations on mobile for better performance
+    return (
+      <Tag className={cn('', className)}>
+        <span className="inline-block">
+          {textArray[0]}
+        </span>
+        {children}
+      </Tag>
+    );
+  }
+  
+  // Desktop versions with full animations
   if (effectiveAnimation === 'text-transition') {
     return (
       <Tag className={cn('inline-flex overflow-hidden', className)}>
