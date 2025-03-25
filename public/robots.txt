@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /user/
+Disallow: /internal/
+
+# Sitemap
+Sitemap: https://9anime.fun/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 1

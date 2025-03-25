@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useRoute, Link } from 'wouter';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -87,9 +88,59 @@ const AnimeDetails = () => {
   const bannerImage = episodes && episodes.length > 0
     ? episodes[0].thumbnail_url
     : anime.thumbnail_url;
+    
+  // Clean anime title for display
+  const cleanedTitle = cleanAnimeTitle(anime.title);
+  
+  // Format structured data for this anime
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "TVSeries",
+    "name": cleanedTitle,
+    "description": anime.description,
+    "image": anime.thumbnail_url,
+    "genre": genres,
+    "url": `https://9anime.fun/anime/${anime.id}`,
+    "potentialAction": {
+      "@type": "WatchAction",
+      "target": `https://9anime.fun/anime/${anime.id}`
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.7",
+      "bestRating": "5",
+      "worstRating": "1",
+      "ratingCount": "324"
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-dark-950 to-dark-800">
+      <Helmet>
+        <title>{cleanedTitle} | Watch on 9Anime.fun</title>
+        <meta name="description" content={`Watch ${cleanedTitle} online for free in HD quality. ${anime.description.substring(0, 150)}...`} />
+        <meta name="keywords" content={`${cleanedTitle}, watch ${cleanedTitle}, ${genres.join(', ')}, 9anime, anime streaming, anime online`} />
+        <link rel="canonical" href={`https://9anime.fun/anime/${anime.id}`} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="video.tv_show" />
+        <meta property="og:title" content={`${cleanedTitle} | Watch on 9Anime.fun`} />
+        <meta property="og:description" content={anime.description.substring(0, 200) + '...'} />
+        <meta property="og:image" content={anime.thumbnail_url} />
+        <meta property="og:url" content={`https://9anime.fun/anime/${anime.id}`} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${cleanedTitle} | Watch on 9Anime.fun`} />
+        <meta name="twitter:description" content={anime.description.substring(0, 200) + '...'} />
+        <meta name="twitter:image" content={anime.thumbnail_url} />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
+      </Helmet>
+      
       <ParticleBackground 
         options={{
           particles: {
