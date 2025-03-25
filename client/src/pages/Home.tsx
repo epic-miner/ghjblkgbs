@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import AnimeCard from '../components/AnimeCard';
 import GenrePill from '../components/GenrePill';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,6 +14,7 @@ import ScrollReveal from '../components/ScrollReveal';
 import TiltCard from '../components/TiltCard';
 import ConfettiEffect from '../components/ConfettiEffect';
 import LottieLoader from '../components/LottieLoader';
+import DefaultSeo from '../components/DefaultSeo';
 import { cleanAnimeTitle } from '../utils/titleFormatter';
 
 // Animation variants for sections
@@ -75,7 +77,7 @@ const Home = () => {
 
   const { data: animeList, isLoading: isLoadingAnime } = useQuery({
     queryKey: ['/api/anime'],
-    queryFn: fetchAllAnime,
+    queryFn: () => fetchAllAnime(),
   });
 
   const { data: episodeCounts } = useQuery({
@@ -231,6 +233,9 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-800 pb-24 md:pb-8">
+      {/* SEO Metadata */}
+      <DefaultSeo />
+      
       {/* Animated gradient background for smooth visual experience */}
       <div className="fixed inset-0 -z-10 bg-gradient-to-br from-dark-950 via-dark-900/90 to-[#1a103a] opacity-80 animate-gradient-slow bg-size-200"></div>
       <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent blur-3xl"></div>

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { cn } from '../lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { useRoute, useLocation } from 'wouter';
+import { Helmet } from 'react-helmet-async';
 import { Skeleton } from '@/components/ui/skeleton';
 import TestFluidPlayer from '../components/TestFluidPlayer'; 
 import { fetchAnimeById, fetchEpisodeById, fetchEpisodesByAnimeId } from '../lib/api';
@@ -266,8 +267,57 @@ const VideoPlayerPage = () => {
     );
   }
 
+  // Format and clean data for SEO
+  const cleanedAnimeTitle = anime ? cleanAnimeTitle(anime.title) : '';
+  const episodeTitle = currentEpisode ? `${cleanedAnimeTitle} Episode ${currentEpisode.episode_number}` : '';
+  const episodeDescription = currentEpisode && currentEpisode.description 
+    ? currentEpisode.description 
+    : `Watch ${cleanedAnimeTitle} Episode ${currentEpisode?.episode_number} online.`;
+  
+  // Format structured data for this episode
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    "name": episodeTitle,
+    "description": episodeDescription,
+    "thumbnailUrl": currentEpisode?.thumbnail_url || anime?.thumbnail_url,
+    "uploadDate": new Date().toISOString(),
+    "contentUrl": `https://9anime.fun/watch/${animeId}/${episodeId}`,
+    "embedUrl": `https://9anime.fun/watch/${animeId}/${episodeId}`,
+    "potentialAction": {
+      "@type": "WatchAction",
+      "target": `https://9anime.fun/watch/${animeId}/${episodeId}`
+    }
+  };
+  
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-black to-dark-950">
+      <Helmet>
+        <title>{episodeTitle} | Watch on 9Anime.fun</title>
+        <meta name="description" content={episodeDescription.substring(0, 160)} />
+        <meta name="keywords" content={`${cleanedAnimeTitle}, episode ${currentEpisode?.episode_number}, watch ${cleanedAnimeTitle}, anime streaming, free anime, 9anime`} />
+        <link rel="canonical" href={`https://9anime.fun/watch/${animeId}/${episodeId}`} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="video.episode" />
+        <meta property="og:title" content={`${episodeTitle} | Watch on 9Anime.fun`} />
+        <meta property="og:description" content={episodeDescription.substring(0, 200)} />
+        <meta property="og:image" content={currentEpisode?.thumbnail_url || anime?.thumbnail_url} />
+        <meta property="og:url" content={`https://9anime.fun/watch/${animeId}/${episodeId}`} />
+        <meta property="og:video" content={currentEpisode?.video_url_max_quality} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="player" />
+        <meta name="twitter:title" content={`${episodeTitle} | Watch on 9Anime.fun`} />
+        <meta name="twitter:description" content={episodeDescription.substring(0, 200)} />
+        <meta name="twitter:image" content={currentEpisode?.thumbnail_url || anime?.thumbnail_url} />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
+      </Helmet>
+      
       <div className="max-w-7xl mx-auto w-full relative z-10">
         {/* Test Player Implementation */}
         <div className="w-full flex flex-col bg-black">
