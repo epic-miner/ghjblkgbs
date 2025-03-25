@@ -29,8 +29,6 @@ const sessionPatterns: Record<string, {
 }> = {};
 
 // Constants for rate limiting
-const MAX_REQUESTS_PER_MINUTE = 60;
-
 const MAX_REQUESTS_PER_MINUTE = 120; // Set appropriate threshold for your app
 
 // Generate security token
