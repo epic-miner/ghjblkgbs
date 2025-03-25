@@ -42,41 +42,6 @@
   height: 100% !important;
 }
 
-/* Enhanced image loading styles */
-.image-loading-placeholder {
-  background: linear-gradient(110deg, #1a103a 8%, #271356 18%, #1a103a 33%);
-  background-size: 200% 100%;
-  animation: shine 1.5s linear infinite;
-  border-radius: 0.5rem;
-}
-
-.lazy-image-wrapper {
-  position: relative;
-  overflow: hidden;
-  border-radius: 0.5rem;
-  transform: translateZ(0);
-  will-change: transform, opacity;
-}
-
-.lazy-image-blur-effect {
-  filter: blur(2px); /* Reduced blur for sharper initial appearance */
-  transition: filter 0.2s ease-out;
-  -webkit-backface-visibility: hidden;
-  -moz-backface-visibility: hidden;
-  -webkit-transform: translate3d(0, 0, 0);
-  -moz-transform: translate3d(0, 0, 0);
-}
-
-.lazy-image-loaded {
-  filter: blur(0);
-}
-
-@keyframes shine {
-  to {
-    background-position-x: -200%;
-  }
-}
-
 /* Theater mode styling */
 .fluid_theatre_mode {
   position: fixed !important;

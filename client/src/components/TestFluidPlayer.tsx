@@ -1,10 +1,9 @@
-import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Episode } from '../../../shared/types';
 import CustomQualityMenu from './CustomQualityMenu';
 import { updateWatchHistory } from '../lib/cookies';
 import '../styles/fluid-player.css';
 import '../styles/play-button-fix.css';
-import { debounce } from '@/lib/utils';
 
 // Define the quality types
 export type VideoQuality = '1080p' | '720p' | '480p' | 'auto';
@@ -130,15 +129,9 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ episode, onClose }) =
             console.log('Video paused');
           });
           
-          // Create a memoized and debounced time update handler to reduce UI updates
-          const debouncedTimeUpdate = useMemo(
-            () => debounce((time: number) => {
-              setCurrentTime(time);
-            }, 250), // Only update UI every 250ms
-            []
-          );
-          
-          playerInstanceRef.current.on('timeupdate', debouncedTimeUpdate);
+          playerInstanceRef.current.on('timeupdate', (time: number) => {
+            setCurrentTime(time);
+          });
           
           playerInstanceRef.current.on('ended', () => {
             clearWatchHistoryTracking();
@@ -238,46 +231,16 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ episode, onClose }) =
     }
   };
 
-  // Watch history tracking functions with optimization
-  // Create an efficient memoized debounced watch progress updater
-  const updateWatchProgress = useMemo(() => {
-    // Create debounced function that won't fire too frequently
-    return debounce(() => {
-      if (!videoRef.current || !episode?.id) return;
-
-      const currentVideoTime = videoRef.current.currentTime;
-      const videoDuration = videoRef.current.duration;
-
-      if (isNaN(videoDuration) || videoDuration <= 0) return;
-
-      // Calculate percentage progress (only store integer values to reduce storage churn)
-      const progressPercentage = Math.floor((currentVideoTime / videoDuration) * 100);
-
-      // Update watch history - only if significant progress (>1%) has been made
-      // This reduces unnecessary cookie updates
-      updateWatchHistory({
-        animeId: episode.anime_id.toString(),
-        episodeId: episode.id.toString(),
-        title: episode.title || '',
-        episodeNumber: episode.episode_number,
-        animeThumbnail: episode.thumbnail_url,
-        animeTitle: episode.anime_title || '',
-        progress: progressPercentage,
-        timestamp: new Date().getTime()
-      });
-    }, 3000); // 3 second debounce for less frequent updates
-  }, [episode]);
-
-  // Start tracking with performance optimization
+  // Watch history tracking functions
   const startWatchHistoryTracking = () => {
-    // Clear any existing interval
-    clearWatchHistoryTracking();
+    if (updateIntervalRef.current) {
+      clearInterval(updateIntervalRef.current);
+    }
 
-    // Use a longer interval (10 seconds) for better performance
-    // The debounced function handles quick updates
+    // Update watch history every 5 seconds
     updateIntervalRef.current = setInterval(() => {
       updateWatchProgress();
-    }, 10000); // Reduced frequency for better performance
+    }, 5000);
   };
 
   const clearWatchHistoryTracking = () => {
@@ -285,6 +248,30 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ episode, onClose }) =
       clearInterval(updateIntervalRef.current);
       updateIntervalRef.current = null;
     }
+  };
+
+  const updateWatchProgress = () => {
+    if (!videoRef.current || !episode?.id) return;
+
+    const currentVideoTime = videoRef.current.currentTime;
+    const videoDuration = videoRef.current.duration;
+
+    if (isNaN(videoDuration) || videoDuration <= 0) return;
+
+    // Calculate percentage progress
+    const progressPercentage = Math.floor((currentVideoTime / videoDuration) * 100);
+
+    // Update watch history
+    updateWatchHistory({
+      animeId: episode.anime_id.toString(),
+      episodeId: episode.id.toString(),
+      title: episode.title || '',
+      episodeNumber: episode.episode_number,
+      animeThumbnail: episode.thumbnail_url,
+      animeTitle: episode.anime_title || '',
+      progress: progressPercentage,
+      timestamp: new Date().getTime()
+    });
   };
 
   // Apply play button fixes
