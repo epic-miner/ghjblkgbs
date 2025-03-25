@@ -53,6 +53,8 @@
     "color-thief-node": "^1.0.4",
     "connect-pg-simple": "^10.0.0",
     "date-fns": "^3.6.0",
+    "devtools-detect": "^4.0.2",
+    "disable-devtool": "^0.3.8",
     "drizzle-orm": "^0.39.1",
     "drizzle-zod": "^0.7.0",
     "embla-carousel-react": "^8.3.0",
