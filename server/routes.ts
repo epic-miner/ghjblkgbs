@@ -3,11 +3,43 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import axios from "axios";
 import { z } from "zod";
+import { 
+  securityMiddleware,
+  getClientId,
+  blockClient,
+  generateClientToken,
+  validateClientToken
+} from "./lib/security";
 
 const API_URL = "https://polished-river-de65.ahf626085.workers.dev/api";
 const API_KEY = "7291826614";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Apply security middleware to all routes
+  app.use(securityMiddleware);
+  
+  // Security Routes
+  app.get("/api/security/token", (req, res) => {
+    const clientId = getClientId(req);
+    const token = generateClientToken(clientId);
+    res.json({ token });
+  });
+  
+  app.post("/api/security/devtools-detection", (req, res) => {
+    const clientId = getClientId(req);
+    const { devToolsOpen, token } = req.body;
+    
+    if (devToolsOpen && validateClientToken(clientId, token)) {
+      // Block the client
+      blockClient(clientId);
+      return res.status(403).json({ 
+        error: "Security violation",
+        message: "Developer tools detected. Access terminated."
+      });
+    }
+    
+    res.json({ status: "ok" });
+  });
   // API proxy routes to handle requests to the anime API
   app.get("/api/anime", async (req, res) => {
     try {

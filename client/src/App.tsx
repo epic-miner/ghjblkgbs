@@ -7,6 +7,7 @@ import { PageTransition } from "./components/PageTransition";
 import { lazy, Suspense, useEffect } from "react";
 import { initializeGlobalSecurity } from "./lib/security";
 import { useConsoleProtection } from './hooks/useConsoleProtection';
+import { setupDevToolsProtection } from './lib/devToolsProtection';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { ColorSchemeProvider } from './contexts/ColorSchemeContext';
@@ -32,6 +33,7 @@ function App() {
   // Initialize global security measures
   useEffect(() => {
     initializeGlobalSecurity();
+    setupDevToolsProtection(); // Added to initialize dev tools protection
   }, []);
 
   return (
