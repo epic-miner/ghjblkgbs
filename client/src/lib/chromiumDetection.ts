@@ -10,40 +10,37 @@ export const setupChromiumDetection = (callback: () => void) => {
 
   // Main detection function
   const detectDevTools = () => {
-    // Specific Chrome/Chromium detection using debugger trick
-    const element = new Image();
-
-    Object.defineProperty(element, 'id', {
-      get: function() {
-        devToolsOpen = true;
-
-        // Notify server about detection
-        try {
-          axios.post('/api/security/devtools-detection', {
-            devToolsOpen: true,
-            browser: 'chromium',
-            timestamp: Date.now(),
-            token: localStorage.getItem('security_token') || ''
-          }).catch(() => {});
-        } catch (e) {
-          // Silent fail
-        }
-
-        // Clear sensitive data
-        clearBrowserData();
-
-        // Execute callback
-        callback();
-
-        // Redirect to YouTube
-        window.location.href = YOUTUBE_REDIRECT_URL;
-
-        return '';
+    // Only proceed with detection if we haven't already detected devtools
+    if (devToolsOpen) return;
+    
+    // More reliable detection method based on window dimensions
+    const widthDiff = window.outerWidth - window.innerWidth;
+    const heightDiff = window.outerHeight - window.innerHeight;
+    
+    // More reasonable threshold (200+ pixels difference likely means devtools is open)
+    if (widthDiff > 200 || heightDiff > 200) {
+      devToolsOpen = true;
+      
+      // Notify server about detection
+      try {
+        axios.post('/api/security/devtools-detection', {
+          devToolsOpen: true,
+          browser: 'chromium',
+          timestamp: Date.now(),
+          token: localStorage.getItem('security_token') || ''
+        }).catch(() => {});
+      } catch (e) {
+        // Silent fail
       }
-    });
-
-    // Trigger detection
-    console.log(element);
+      
+      // Execute callback
+      callback();
+      
+      // Redirect to YouTube (with a slight delay)
+      setTimeout(() => {
+        window.location.href = YOUTUBE_REDIRECT_URL;
+      }, 500);
+    }
   };
 
   // Clear sensitive browser data

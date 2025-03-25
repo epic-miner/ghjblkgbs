@@ -73,16 +73,27 @@ export const setupDevToolsProtection = () => {
     }
   };
 
-  // Size-based detection
+  // Size-based detection with improved accuracy
   const checkDevToolsSize = () => {
-    const widthThreshold = window.outerWidth - window.innerWidth > threshold;
-    const heightThreshold = window.outerHeight - window.innerHeight > threshold;
-
-    if (widthThreshold || heightThreshold) {
+    // More accurate detection with higher threshold
+    const widthDiff = window.outerWidth - window.innerWidth;
+    const heightDiff = window.outerHeight - window.innerHeight;
+    
+    // Using a higher threshold to avoid false positives
+    // This accounts for browser UI elements and zoom factors
+    if (widthDiff > 200 || heightDiff > 200) {
       if (!isDevToolsOpen) {
-        isDevToolsOpen = true;
-        sendHeartbeat();
-        blockConnection();
+        // Double-check before confirming
+        setTimeout(() => {
+          const newWidthDiff = window.outerWidth - window.innerWidth;
+          const newHeightDiff = window.outerHeight - window.innerHeight;
+          
+          if (newWidthDiff > 200 || newHeightDiff > 200) {
+            isDevToolsOpen = true;
+            sendHeartbeat();
+            blockConnection();
+          }
+        }, 500); // Wait half a second to confirm
       }
     }
   };
@@ -104,46 +115,23 @@ export const setupDevToolsProtection = () => {
     }
   };
 
-  // Advanced detection techniques
+  // More reliable detection techniques
   const setupAdvancedDetection = () => {
-    // Detect debugger statements (common in devtools)
-    try {
-      const startTime = performance.now();
-      debugger;
-      const endTime = performance.now();
+    // Only use reliable window dimension checks
+    // Other methods are removed as they cause too many false positives
+    
+    // Monitor resize events which could indicate devtools opening
+    window.addEventListener('resize', () => {
+      // Check with reasonable thresholds
+      const widthDiff = window.outerWidth - window.innerWidth;
+      const heightDiff = window.outerHeight - window.innerHeight;
       
-      // If debugger takes too long, likely devtools are open
-      if (endTime - startTime > 100) {
+      if (widthDiff > 250 || heightDiff > 250) {
+        // Only mark as detected if we're very confident
         isDevToolsOpen = true;
         blockConnection();
-      }
-    } catch (e) {
-      // Silent fail
-    }
-    
-    // Detect console.log overrides (often done in devtools)
-    const originalLog = console.log;
-    console.log = function() {
-      if (arguments[0] === '%c') {
-        isDevToolsOpen = true;
-        blockConnection();
-      }
-      return originalLog.apply(this, arguments);
-    };
-    
-    // Test console styling (only works in devtools)
-    console.log('%c', 'font-size:0;');
-    
-    // Advanced detection for Firefox
-    const div = document.createElement('div');
-    Object.defineProperty(div, 'id', {
-      get: function() {
-        isDevToolsOpen = true;
-        blockConnection();
-        return 'id';
       }
     });
-    console.log(div);
   };
 
   // Request verification token from server on page load
