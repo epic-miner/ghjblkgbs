@@ -1,3 +1,4 @@
+# Global rules for all crawlers
 User-agent: *
 Allow: /
 Disallow: /api/
@@ -6,9 +7,57 @@ Disallow: /login
 Disallow: /register
 Disallow: /user/
 Disallow: /internal/
-
-# Sitemap
-Sitemap: https://9anime.fun/sitemap.xml
-
-# Crawl delay
+Disallow: /*?force=
+Disallow: /*?t=
+Disallow: /private/
+Disallow: /embed$
+Disallow: /watch/*?autoplay=
 Crawl-delay: 1
+
+# Google-specific rules
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+Crawl-delay: 0.5
+
+# Google Image-specific rules
+User-agent: Googlebot-Image
+Allow: /assets/
+Allow: /images/
+Allow: /thumbnails/
+Disallow: /private/
+
+# Bing-specific rules
+User-agent: Bingbot
+Allow: /
+Disallow: /api/
+Crawl-delay: 1
+
+# Rules for AI web crawlers (to prevent training on copyrighted content)
+User-agent: GPTBot
+Disallow: /watch/
+Disallow: /embed/
+
+User-agent: ChatGPT-User
+Disallow: /watch/
+Disallow: /embed/
+
+User-agent: anthropic-ai
+Disallow: /watch/
+Disallow: /embed/
+
+User-agent: CCBot
+Disallow: /watch/
+Disallow: /embed/
+
+User-agent: Claude-Web
+Disallow: /watch/
+Disallow: /embed/
+
+# Sitemaps
+Sitemap: https://9anime.fun/sitemap.xml
+Sitemap: https://9anime.fun/sitemap-videos.xml
+Sitemap: https://9anime.fun/sitemap-categories.xml
+
+# Host directive
+Host: 9anime.fun

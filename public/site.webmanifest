@@ -1,22 +1,96 @@
 {
-  "name": "9Anime",
+  "name": "9Anime - Watch Free Anime Online",
   "short_name": "9Anime",
-  "description": "Watch anime online for free in HD quality with English subtitles",
+  "description": "Watch anime online for free in HD quality with English subtitles. Stream the latest episodes and popular titles.",
+  "categories": ["entertainment", "video", "anime"],
+  "lang": "en-US",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/images/icons/android-chrome-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/images/icons/android-chrome-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/icons/maskable-icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/images/icons/maskable-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/screenshots/home-screen.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "label": "Home screen of 9Anime"
+    },
+    {
+      "src": "/images/screenshots/player-screen.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "label": "Video player screen"
     }
   ],
   "theme_color": "#1D4ED8",
   "background_color": "#12131A",
   "display": "standalone",
-  "start_url": "/",
-  "orientation": "portrait"
+  "display_override": ["window-controls-overlay", "fullscreen", "minimal-ui"],
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "orientation": "any",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Latest Anime",
+      "short_name": "Latest",
+      "description": "View the latest released anime episodes",
+      "url": "/category/recent",
+      "icons": [
+        {
+          "src": "/images/icons/latest-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Trending Anime",
+      "short_name": "Trending",
+      "description": "Explore trending anime series",
+      "url": "/category/trending",
+      "icons": [
+        {
+          "src": "/images/icons/trending-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Continue Watching",
+      "short_name": "Continue",
+      "description": "Continue watching your anime",
+      "url": "/recently-watched",
+      "icons": [
+        {
+          "src": "/images/icons/continue-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "iarc_rating_id": "e58c174a-ec1b-4169-8d39-31e5c5ff2e83",
+  "related_applications": []
 }

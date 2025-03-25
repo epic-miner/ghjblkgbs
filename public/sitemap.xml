@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
   <url>
     <loc>https://9anime.fun/</loc>
     <lastmod>2025-03-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://9anime.fun/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://9anime.fun/ja/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://9anime.fun/"/>
+    <image:image>
+      <image:loc>https://9anime.fun/logo.png</image:loc>
+      <image:caption>9Anime Logo</image:caption>
+      <image:title>9Anime - Watch Anime Online</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://9anime.fun/category/trending</loc>
@@ -83,5 +94,70 @@
     <lastmod>2025-03-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+  </url>
+  
+  <!-- Example anime detail pages (should be dynamically generated in production) -->
+  <url>
+    <loc>https://9anime.fun/anime/1</loc>
+    <lastmod>2025-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <video:video>
+      <video:thumbnail_loc>https://9anime.fun/images/thumbnails/anime1.jpg</video:thumbnail_loc>
+      <video:title>Attack on Titan</video:title>
+      <video:description>Humans fight against giant humanoid creatures called Titans.</video:description>
+      <video:content_loc>https://9anime.fun/watch/1/1</video:content_loc>
+      <video:player_loc>https://9anime.fun/embed/1/1</video:player_loc>
+      <video:duration>1440</video:duration>
+      <video:rating>4.9</video:rating>
+      <video:family_friendly>yes</video:family_friendly>
+      <video:tag>action</video:tag>
+      <video:tag>fantasy</video:tag>
+      <video:tag>drama</video:tag>
+    </video:video>
+  </url>
+  
+  <url>
+    <loc>https://9anime.fun/anime/2</loc>
+    <lastmod>2025-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <video:video>
+      <video:thumbnail_loc>https://9anime.fun/images/thumbnails/anime2.jpg</video:thumbnail_loc>
+      <video:title>Demon Slayer</video:title>
+      <video:description>A boy becomes a demon slayer after his family is slaughtered.</video:description>
+      <video:content_loc>https://9anime.fun/watch/2/1</video:content_loc>
+      <video:player_loc>https://9anime.fun/embed/2/1</video:player_loc>
+      <video:duration>1440</video:duration>
+      <video:rating>4.8</video:rating>
+      <video:family_friendly>yes</video:family_friendly>
+      <video:tag>action</video:tag>
+      <video:tag>supernatural</video:tag>
+    </video:video>
+  </url>
+  
+  <!-- Example watch pages (should be dynamically generated in production) -->
+  <url>
+    <loc>https://9anime.fun/watch/1/1</loc>
+    <lastmod>2025-03-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <video:video>
+      <video:thumbnail_loc>https://9anime.fun/images/thumbnails/anime1_ep1.jpg</video:thumbnail_loc>
+      <video:title>Attack on Titan - Episode 1</video:title>
+      <video:description>The first episode of Attack on Titan</video:description>
+    </video:video>
+  </url>
+  
+  <url>
+    <loc>https://9anime.fun/watch/2/1</loc>
+    <lastmod>2025-03-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <video:video>
+      <video:thumbnail_loc>https://9anime.fun/images/thumbnails/anime2_ep1.jpg</video:thumbnail_loc>
+      <video:title>Demon Slayer - Episode 1</video:title>
+      <video:description>The first episode of Demon Slayer</video:description>
+    </video:video>
   </url>
 </urlset>
