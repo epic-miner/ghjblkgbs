@@ -28,6 +28,9 @@ const sessionPatterns: Record<string, {
   userAgent?: string
 }> = {};
 
+// Constants for rate limiting
+const MAX_REQUESTS_PER_MINUTE = 60;
+
 const MAX_REQUESTS_PER_MINUTE = 120; // Set appropriate threshold for your app
 
 // Generate security token
@@ -180,6 +183,71 @@ export const enhancedSecurityScan = (req: Request, res: Response, next: NextFunc
 // Get session security status (for internal use)
 export const getSessionStatus = (sessionId: string) => {
   return activeSessions[sessionId] || { isBlocked: false, devToolsDetected: false };
+};
+
+// Middleware to detect and block web scraping tools
+export const scraperDetectionMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const sessionId = req.ip || 'unknown';
+  
+  // Track request patterns to detect scraping or automation tools
+  if (!sessionPatterns[sessionId]) {
+    sessionPatterns[sessionId] = {
+      requestCount: 1,
+      lastRequest: Date.now(),
+      userAgent: req.headers['user-agent']
+    };
+  } else {
+    const now = Date.now();
+    const timeSinceLastRequest = now - sessionPatterns[sessionId].lastRequest;
+
+    // If within the same minute, increment counter
+    if (timeSinceLastRequest < 60000) {
+      sessionPatterns[sessionId].requestCount++;
+
+      // Check for rate limiting
+      if (sessionPatterns[sessionId].requestCount > MAX_REQUESTS_PER_MINUTE) {
+        activeSessions[sessionId] = {
+          token: '',
+          isBlocked: true,
+          timestamp: Date.now(),
+          devToolsDetected: false
+        };
+
+        console.warn(`Rate limit exceeded for session ${sessionId}. Potential scraping detected.`);
+        return res.status(429).json({ error: 'Rate limit exceeded. Please try again later.' });
+      }
+    } else {
+      // Reset counter for new minute
+      sessionPatterns[sessionId].requestCount = 1;
+    }
+
+    sessionPatterns[sessionId].lastRequest = now;
+  }
+
+  // Check for suspicious user agents (common scraping tools)
+  const userAgent = (req.headers['user-agent'] || '').toLowerCase();
+  const suspiciousAgents = ['wget', 'curl', 'python-requests', 'scrapy', 'beautifulsoup', 'aria2', 'httrack'];
+  
+  if (suspiciousAgents.some(agent => userAgent.includes(agent))) {
+    activeSessions[sessionId] = {
+      token: '',
+      isBlocked: true,
+      timestamp: Date.now(),
+      devToolsDetected: false
+    };
+
+    console.warn(`Suspicious user agent detected: ${userAgent}`);
+    return res.status(403).json({ error: 'Access denied for security reasons' });
+  }
+
+  // Check for missing headers that browsers typically send
+  if (!req.headers['accept-language'] || !req.headers['accept']) {
+    // This may indicate a script rather than a browser
+    console.warn(`Request missing standard headers from ${sessionId}`);
+    // We could block here, but just logging for now to avoid false positives
+  }
+
+  next();
 };
 
 // Block specific session
