@@ -3,35 +3,11 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import axios from "axios";
 import { z } from "zod";
-import { 
-  securityMiddleware,
-  getClientId,
-  blockClient,
-  generateClientToken,
-  validateClientToken,
-  generateSecurityToken, // Placeholder
-  handleDevToolsDetection, // Placeholder
-  enhancedSecurityScan // Placeholder
-} from "./lib/security";
 
 const API_URL = "https://polished-river-de65.ahf626085.workers.dev/api";
 const API_KEY = "7291826614";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Apply security middleware to all routes
-  app.use(securityMiddleware);
-
-  // Security Routes
-  app.get("/api/security/token", generateSecurityToken); // Placeholder function call
-  app.post("/api/security/devtools-detection", handleDevToolsDetection); // Placeholder function call
-
-
-  // Apply enhanced security to sensitive routes
-  const sensitiveRoutes = ['/api/episodes', '/api/anime', '/api/users']; // Assuming /api/users exists
-  sensitiveRoutes.forEach(route => {
-    app.use(route, enhancedSecurityScan); // Placeholder function call
-  });
-
   // API proxy routes to handle requests to the anime API
   app.get("/api/anime", async (req, res) => {
     try {
@@ -59,7 +35,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const url = animeId 
         ? `${API_URL}/episodes?anime_id=${animeId}` 
         : `${API_URL}/episodes`;
-
+      
       const response = await axios.get(url);
       res.json(response.data);
     } catch (error) {
@@ -83,21 +59,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const query = req.query.q;
       const type = req.query.type || 'all';
       const genre = req.query.genre;
-
+      
       let url = `${API_URL}/search?`;
-
+      
       if (query) {
         url += `q=${encodeURIComponent(String(query))}&`;
       }
-
+      
       if (type) {
         url += `type=${encodeURIComponent(String(type))}&`;
       }
-
+      
       if (genre) {
         url += `genre=${encodeURIComponent(String(genre))}&`;
       }
-
+      
       const response = await axios.get(url);
       res.json(response.data);
     } catch (error) {

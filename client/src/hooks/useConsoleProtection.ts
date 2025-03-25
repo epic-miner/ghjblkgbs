@@ -35,24 +35,13 @@ export const useConsoleProtection = () => {
     };
 
     const checkDevTools = () => {
-      // Using a much higher threshold to avoid false positives
-      const widthDiff = window.outerWidth - window.innerWidth;
-      const heightDiff = window.outerHeight - window.innerHeight;
-      
-      // Higher threshold (200px) to avoid detecting browser UI elements as DevTools
-      if (widthDiff > 200 || heightDiff > 200) {
-        // Only mark as open if we're confident
+      const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+      const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+
+      if (widthThreshold || heightThreshold) {
         if (!isDevToolsOpen) {
-          // Double-check after a delay to confirm it's not a temporary UI change
-          setTimeout(() => {
-            const newWidthDiff = window.outerWidth - window.innerWidth;
-            const newHeightDiff = window.outerHeight - window.innerHeight;
-            
-            if (newWidthDiff > 200 || newHeightDiff > 200) {
-              isDevToolsOpen = true;
-              createBlocker();
-            }
-          }, 1000);
+          isDevToolsOpen = true;
+          createBlocker();
         }
       } else {
         isDevToolsOpen = false;
