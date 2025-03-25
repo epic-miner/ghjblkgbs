@@ -60,6 +60,16 @@ export const handleDevToolsDetection = (req: Request, res: Response) => {
 
     // Log suspicious activity (in production this could trigger security alerts)
     console.warn(`DevTools detected for session ${sessionId}. Access restricted.`);
+    
+    // Set a timeout to automatically clear block after 5 minutes
+    // This helps with false positives
+    setTimeout(() => {
+      if (activeSessions[sessionId]) {
+        activeSessions[sessionId].isBlocked = false;
+        activeSessions[sessionId].devToolsDetected = false;
+        console.log(`Temporary block for session ${sessionId} has been lifted.`);
+      }
+    }, 5 * 60 * 1000); // 5 minutes
 
     return res.status(403).json({ error: 'Security violation detected' });
   } catch (error) {

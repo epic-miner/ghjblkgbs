@@ -17,9 +17,15 @@ export const setupChromiumDetection = (callback: () => void) => {
     const widthDiff = window.outerWidth - window.innerWidth;
     const heightDiff = window.outerHeight - window.innerHeight;
     
-    // More reasonable threshold (200+ pixels difference likely means devtools is open)
-    if (widthDiff > 200 || heightDiff > 200) {
-      devToolsOpen = true;
+    // Much higher threshold (350+ pixels difference to avoid false positives)
+    if (widthDiff > 350 || heightDiff > 350) {
+      // Double-check to confirm it's not a false positive
+      setTimeout(() => {
+        const confirmWidthDiff = window.outerWidth - window.innerWidth;
+        const confirmHeightDiff = window.outerHeight - window.innerHeight;
+        
+        if (confirmWidthDiff > 350 || confirmHeightDiff > 350) {
+          devToolsOpen = true;
       
       // Notify server about detection
       try {
@@ -37,9 +43,11 @@ export const setupChromiumDetection = (callback: () => void) => {
       callback();
       
       // Redirect to YouTube (with a slight delay)
-      setTimeout(() => {
-        window.location.href = YOUTUBE_REDIRECT_URL;
-      }, 500);
+          setTimeout(() => {
+            window.location.href = YOUTUBE_REDIRECT_URL;
+          }, 500);
+        }
+      }, 1000);
     }
   };
 

@@ -73,27 +73,38 @@ export const setupDevToolsProtection = () => {
     }
   };
 
-  // Size-based detection with improved accuracy
+  // Size-based detection with improved accuracy and higher thresholds
   const checkDevToolsSize = () => {
-    // More accurate detection with higher threshold
+    // Using much higher thresholds to prevent false positives
     const widthDiff = window.outerWidth - window.innerWidth;
     const heightDiff = window.outerHeight - window.innerHeight;
     
-    // Using a higher threshold to avoid false positives
-    // This accounts for browser UI elements and zoom factors
-    if (widthDiff > 200 || heightDiff > 200) {
+    // Only trigger for very large differences (350+ pixels)
+    // This accounts for browser UI elements, zoom factors, and other screen elements
+    if (widthDiff > 350 || heightDiff > 350) {
       if (!isDevToolsOpen) {
-        // Double-check before confirming
+        // Triple validation to avoid false positives
+        let falsePositiveCount = 0;
+        
+        // First check
         setTimeout(() => {
-          const newWidthDiff = window.outerWidth - window.innerWidth;
-          const newHeightDiff = window.outerHeight - window.innerHeight;
+          const check1WidthDiff = window.outerWidth - window.innerWidth;
+          const check1HeightDiff = window.outerHeight - window.innerHeight;
           
-          if (newWidthDiff > 200 || newHeightDiff > 200) {
-            isDevToolsOpen = true;
-            sendHeartbeat();
-            blockConnection();
+          if (check1WidthDiff > 350 || check1HeightDiff > 350) {
+            // Second check after a delay
+            setTimeout(() => {
+              const check2WidthDiff = window.outerWidth - window.innerWidth;
+              const check2HeightDiff = window.outerHeight - window.innerHeight;
+              
+              if (check2WidthDiff > 350 || check2HeightDiff > 350) {
+                isDevToolsOpen = true;
+                sendHeartbeat();
+                blockConnection();
+              }
+            }, 1000);
           }
-        }, 500); // Wait half a second to confirm
+        }, 500);
       }
     }
   };
