@@ -7,19 +7,20 @@ import axios from 'axios';
 
 export const setupChromiumDetection = (callback: () => void) => {
   let detectionActive = true;
+  let devToolsDetected = false;
   
-  // Method 1: Debugger statement detection
+  // Method 1: Debugger statement detection with improved accuracy
   const debuggerCheck = () => {
     try {
-      let counter = 0;
       const start = new Date().getTime();
       
       // This debugger statement will pause execution if DevTools is open
       debugger;
       
       const end = new Date().getTime();
-      // Threshold determined by testing on various Chromium browsers
-      if (end - start > 100) {
+      // Only trigger if time difference is significant (DevTools open)
+      if (end - start > 100 && !devToolsDetected) {
+        devToolsDetected = true;
         callback();
         return true;
       }
@@ -29,7 +30,7 @@ export const setupChromiumDetection = (callback: () => void) => {
     return false;
   };
   
-  // Method 2: Element dimension examination
+  // Method 2: Element dimension examination with higher precision
   const elementSizeCheck = () => {
     const element = document.createElement('div');
     element.style.width = '1px';
@@ -38,13 +39,14 @@ export const setupChromiumDetection = (callback: () => void) => {
     element.style.bottom = '0';
     element.style.right = '0';
     document.body.appendChild(element);
-
+    
     // In Chromium browsers, element dimensions change when DevTools is open
     const width = element.offsetWidth;
     const height = element.offsetHeight;
     document.body.removeChild(element);
     
-    if (width !== 1 || height !== 1) {
+    if ((width !== 1 || height !== 1) && !devToolsDetected) {
+      devToolsDetected = true;
       callback();
       return true;
     }
@@ -52,14 +54,15 @@ export const setupChromiumDetection = (callback: () => void) => {
     return false;
   };
   
-  // Method 3: Console timing
+  // Method 3: Console timing with improved thresholds
   const consoleTimingCheck = () => {
     const start = performance.now();
     console.clear();
     const end = performance.now();
     
     // Chromium browsers have significantly different timing when DevTools is open
-    if (end - start > 20) {
+    if (end - start > 20 && !devToolsDetected) {
+      devToolsDetected = true;
       callback();
       return true;
     }
@@ -67,7 +70,7 @@ export const setupChromiumDetection = (callback: () => void) => {
     return false;
   };
   
-  // Method 4: Specific Chromium objects
+  // Method 4: Specific Chromium objects with more detailed checking
   const chromiumObjectsCheck = () => {
     // @ts-ignore
     if (window.chrome && (window.chrome.loadTimes || window.chrome.csi)) {
@@ -85,7 +88,8 @@ export const setupChromiumDetection = (callback: () => void) => {
       console.log(testObject);
       console.clear();
       
-      if (devToolsOpened) {
+      if (devToolsOpened && !devToolsDetected) {
+        devToolsDetected = true;
         callback();
         return true;
       }
@@ -94,33 +98,54 @@ export const setupChromiumDetection = (callback: () => void) => {
     return false;
   };
   
-  // Run all detection methods
+  // Method 5: Dev tools orientation detection
+  const orientationCheck = () => {
+    const isHorizontal = window.outerWidth - window.innerWidth > 160;
+    const isVertical = window.outerHeight - window.innerHeight > 160;
+    
+    if ((isHorizontal || isVertical) && !devToolsDetected) {
+      devToolsDetected = true;
+      callback();
+      return true;
+    }
+    
+    return false;
+  };
+  
+  // Run all detection methods periodically
   const runDetection = () => {
     if (!detectionActive) return;
     
     const detected = debuggerCheck() || 
-                     elementSizeCheck() || 
+                     elementSizeCheck() ||
                      consoleTimingCheck() || 
-                     chromiumObjectsCheck();
+                     chromiumObjectsCheck() ||
+                     orientationCheck();
     
+    // Only keep checking if not yet detected
     if (detected) {
-      // Reduce check frequency after detection
+      // Reduce check frequency once detected to avoid performance impact
       detectionActive = false;
-      setTimeout(() => { detectionActive = true; }, 10000);
+      setTimeout(() => {
+        detectionActive = true;
+      }, 10000); // Check again after 10 seconds
     }
   };
   
-  // Run detection immediately and at intervals
+  // Initial detection
   runDetection();
   
-  // Use different intervals to make pattern detection harder
-  setInterval(runDetection, 750);
-  setTimeout(() => {
-    setInterval(runDetection, 1234); // Odd interval to avoid pattern detection
-  }, 500);
+  // Periodic checks
+  const detectionInterval = setInterval(() => {
+    runDetection();
+  }, 1000);
   
-  // Cleanup function
-  return () => {
-    detectionActive = false;
+  // Public API to stop detection
+  return {
+    stopDetection: () => {
+      detectionActive = false;
+      clearInterval(detectionInterval);
+    },
+    isDevToolsDetected: () => devToolsDetected
   };
 };

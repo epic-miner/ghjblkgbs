@@ -58,6 +58,25 @@ export const setupDevToolsProtection = () => {
 
         // Clear sensitive data from the page
         clearSensitiveData();
+        
+        // Add visible warning only when DevTools are actually detected
+        const warning = document.createElement('div');
+        warning.style.position = 'fixed';
+        warning.style.top = '0';
+        warning.style.left = '0';
+        warning.style.width = '100%';
+        warning.style.height = '100%';
+        warning.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+        warning.style.color = 'red';
+        warning.style.display = 'flex';
+        warning.style.alignItems = 'center';
+        warning.style.justifyContent = 'center';
+        warning.style.zIndex = '999999';
+        warning.style.fontSize = '24px';
+        warning.style.textAlign = 'center';
+        warning.style.padding = '20px';
+        warning.innerHTML = '<strong>Security Alert</strong><br>Developer tools detected.<br>Connection blocked for security reasons.';
+        document.body.appendChild(warning);
       }
     } catch (err) {
       // Error handling silently fails to prevent tampering

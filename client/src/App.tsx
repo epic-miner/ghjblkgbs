@@ -77,6 +77,17 @@ function App() {
           overlay.style.zIndex = '999999';
           overlay.innerHTML = '<div>Security Alert: Developer Tools Detected<br>Access to content has been restricted</div>';
           document.body.appendChild(overlay);
+          
+          // Also inform the server that DevTools are open
+          try {
+            axios.post('/api/security/devtools-detection', { 
+              devToolsOpen: true,
+              timestamp: Date.now(),
+              token: localStorage.getItem('security_token') || ''
+            });
+          } catch (e) {
+            // Silent fail
+          }
         } catch (err) {
           // Silent fail to prevent debugging
         }
