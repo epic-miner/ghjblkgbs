@@ -92,15 +92,23 @@ const AnimeDetails = () => {
   // Clean anime title for display
   const cleanedTitle = cleanAnimeTitle(anime.title);
   
-  // Format structured data for this anime
+  // Format enhanced structured data for this anime with episode information
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "TVSeries",
     "name": cleanedTitle,
+    "alternateName": anime.title, // Include original title with tags for better matching
     "description": anime.description,
     "image": anime.thumbnail_url,
+    "thumbnailUrl": anime.thumbnail_url,
     "genre": genres,
     "url": `https://9anime.fun/anime/${anime.id}`,
+    "sameAs": `https://9anime.fun/anime/${anime.id}`,
+    "countryOfOrigin": "JP",
+    "inLanguage": ["ja", "en"],
+    "contentRating": "TV-14",
+    "datePublished": "2023-01-01", // This should be dynamically populated if available
+    "numberOfEpisodes": episodes?.length || 0,
     "potentialAction": {
       "@type": "WatchAction",
       "target": `https://9anime.fun/anime/${anime.id}`
@@ -111,7 +119,21 @@ const AnimeDetails = () => {
       "bestRating": "5",
       "worstRating": "1",
       "ratingCount": "324"
-    }
+    },
+    // Add episode information for rich search results
+    "episode": episodes?.map((episode, index) => ({
+      "@type": "TVEpisode",
+      "episodeNumber": episode.episode_number,
+      "name": episode.title || `Episode ${episode.episode_number}`,
+      "url": `https://9anime.fun/watch/${animeId}/${episode.id}`,
+      "image": episode.thumbnail_url,
+      "description": episode.description || `Watch episode ${episode.episode_number} of ${cleanedTitle}`,
+      "potentialAction": {
+        "@type": "WatchAction",
+        "target": `https://9anime.fun/watch/${animeId}/${episode.id}`
+      },
+      "timeRequired": "PT24M" // Average episode length, ideally would be dynamically calculated
+    })) || []
   };
 
   return (

@@ -274,7 +274,7 @@ const VideoPlayerPage = () => {
     ? currentEpisode.description 
     : `Watch ${cleanedAnimeTitle} Episode ${currentEpisode?.episode_number} online.`;
   
-  // Format structured data for this episode
+  // Format enhanced structured data for this episode with more detailed metadata
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "VideoObject",
@@ -284,10 +284,52 @@ const VideoPlayerPage = () => {
     "uploadDate": new Date().toISOString(),
     "contentUrl": `https://9anime.fun/watch/${animeId}/${episodeId}`,
     "embedUrl": `https://9anime.fun/watch/${animeId}/${episodeId}`,
+    "duration": "PT24M", // Standard episode length, ideally dynamic from real duration
+    "inLanguage": ["ja", "en"],
+    "subtitleLanguage": ["en"],
+    "keywords": `anime,${cleanedAnimeTitle},episode ${currentEpisode?.episode_number},streaming,watch online`,
+    "accessMode": ["visual", "auditory"],
+    "isAccessibleForFree": true,
+    "creditText": `Anime: ${cleanedAnimeTitle}`,
+    "partOfSeries": {
+      "@type": "TVSeries",
+      "name": cleanedAnimeTitle,
+      "url": `https://9anime.fun/anime/${animeId}`
+    },
+    "episodeNumber": currentEpisode?.episode_number,
     "potentialAction": {
       "@type": "WatchAction",
       "target": `https://9anime.fun/watch/${animeId}/${episodeId}`
-    }
+    },
+    // Add video quality options for better SEO
+    "videoQuality": ["HD", "SD"],
+    "contentRating": "TV-14"
+  };
+
+  // Additional structured data for the breadcrumb navigation
+  const breadcrumbData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://9anime.fun/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": cleanedAnimeTitle,
+        "item": `https://9anime.fun/anime/${animeId}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": `Episode ${currentEpisode?.episode_number}`,
+        "item": `https://9anime.fun/watch/${animeId}/${episodeId}`
+      }
+    ]
   };
   
   return (
@@ -315,6 +357,11 @@ const VideoPlayerPage = () => {
         {/* Structured Data */}
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
+        </script>
+        
+        {/* Breadcrumb Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbData)}
         </script>
       </Helmet>
       
