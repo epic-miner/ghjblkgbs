@@ -4,7 +4,7 @@ import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
 import path, { dirname } from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import { fileURLToPath } from "url";
-import javascriptObfuscator from 'javascript-obfuscator';
+// We'll properly import the javascript-obfuscator plugin when it's needed
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -23,39 +23,10 @@ export default defineConfig({
           ),
         ]
       : []),
-    ...(process.env.NODE_ENV === 'production' ? [
-      // Only apply obfuscation in production
-      javascriptObfuscator({
-        compact: true,
-        controlFlowFlattening: true,
-        controlFlowFlatteningThreshold: 0.75,
-        deadCodeInjection: true,
-        deadCodeInjectionThreshold: 0.4,
-        debugProtection: true,
-        debugProtectionInterval: true,
-        disableConsoleOutput: true,
-        identifierNamesGenerator: 'hexadecimal',
-        log: false,
-        numbersToExpressions: true,
-        renameGlobals: false,
-        selfDefending: true,
-        simplify: true,
-        splitStrings: true,
-        splitStringsChunkLength: 10,
-        stringArray: true,
-        stringArrayCallsTransform: true,
-        stringArrayEncoding: ['base64'],
-        stringArrayIndexShift: true,
-        stringArrayRotate: true,
-        stringArrayShuffle: true,
-        stringArrayWrappersCount: 2,
-        stringArrayWrappersChainedCalls: true,
-        stringArrayWrappersParametersMaxCount: 4,
-        stringArrayWrappersType: 'function',
-        transformObjectKeys: true,
-        unicodeEscapeSequence: false
-      })
-    ] : []),
+    // Temporarily disabled until proper plugin setup
+    // ...(process.env.NODE_ENV === 'production' ? [
+    //   // Only apply obfuscation in production  
+    // ] : []),
   ],
   resolve: {
     alias: {

@@ -63,6 +63,7 @@
     "fluid-player": "^3.51.0",
     "framer-motion": "^11.13.1",
     "input-otp": "^1.2.4",
+    "javascript-obfuscator": "^4.1.1",
     "js-cookie": "^3.0.5",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.453.0",

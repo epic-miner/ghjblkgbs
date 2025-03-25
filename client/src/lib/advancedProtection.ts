@@ -1,83 +1,107 @@
 
-import detectDevTools from 'detect-browser-devtools';
-import * as htmlGuard from 'html-guard';
+import devtoolsDetect from 'devtools-detect';
+import DisableDevtool from 'disable-devtool';
 
 // Advanced detection system that uses multiple methods to detect dev tools
 export const setupAdvancedProtection = () => {
-  // Detect-browser-devtools provides another detection mechanism
-  detectDevTools({
-    // Check for dev tools every 1000ms
-    interval: 1000,
-    // What to do when dev tools are detected
-    callback: (isOpen) => {
-      if (isOpen) {
-        window.location.href = 'https://www.youtube.com';
-      }
+  // Use devtools-detect package for detection
+  window.addEventListener('devtoolschange', (event: any) => {
+    if (event.detail.isOpen) {
+      window.location.href = 'https://www.youtube.com';
     }
   });
   
-  // Html-Guard protection (protects HTML elements from inspection)
-  htmlGuard.protect({
-    // When tampering is detected
-    onTamperDetected: () => {
+  // Setup DisableDevtool with comprehensive options
+  DisableDevtool({
+    ondevtoolopen: () => {
       window.location.href = 'https://www.youtube.com';
     },
-    // Check for tampering every 500ms
-    checkInterval: 500,
-    // Protect these elements
-    protectedElements: ['video', '.video-player', '.player-container']
+    interval: 1000,
+    disableMenu: true,
+    disableSelect: true,
+    disableCopy: true,
+    disableCut: true,
+    disablePaste: true
   });
   
-  // Additional window property checks
-  const checkDevToolsProperties = () => {
-    // Firefox dev tools detection
-    if (window.console && (window.console as any).firebug) {
-      window.location.href = 'https://www.youtube.com';
-    }
+  // Additional window property checks for dev tools
+  const widthThreshold = 160;
+  
+  // Check for size discrepancy 
+  const checkDevToolsSize = () => {
+    const widthDiff = window.outerWidth - window.innerWidth > widthThreshold;
+    const heightDiff = window.outerHeight - window.innerHeight > widthThreshold;
     
-    // Chrome and Edge dev tools detection
-    if ((window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__ || 
-        (window as any).__REDUX_DEVTOOLS_EXTENSION__) {
+    if (widthDiff || heightDiff) {
       window.location.href = 'https://www.youtube.com';
     }
   };
   
-  // Run checks periodically
-  setInterval(checkDevToolsProperties, 1000);
+  // Multiple event listeners for different detection methods
+  window.addEventListener('resize', checkDevToolsSize);
+  setInterval(checkDevToolsSize, 1000);
   
-  // One-time checks for specific browser extensions
-  setTimeout(() => {
-    // Check for dev tool extensions
-    if (document.getElementById('react-devtools-hook-div') ||
-        document.getElementById('__react-devtools-browser-extension')) {
-      window.location.href = 'https://www.youtube.com';
-    }
-  }, 2000);
-};
-
-// Function to apply source code protection via obfuscation
-// Note: The actual obfuscation happens during build time using javascript-obfuscator
-export const applyRunTimeProtection = () => {
-  // Runtime checks that make debugging harder
-  (function preventDebugging() {
-    const startTime = new Date().getTime();
-    debugger; // This statement triggers debugger - if dev tools are open, execution will pause here
-    const endTime = new Date().getTime();
-    
-    // If execution took too long, dev tools might be open
-    if (endTime - startTime > 100) {
-      window.location.href = 'https://www.youtube.com';
+  // Prevent right-click context menu
+  document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    return false;
+  });
+  
+  // Disable keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    // Prevent F12
+    if (e.key === 'F12') {
+      e.preventDefault();
+      return false;
     }
     
-    // Schedule the next check
-    setTimeout(preventDebugging, 1000);
-  })();
-};
-
-// Combined protection system
-export const initializeAdvancedProtection = () => {
-  if (process.env.NODE_ENV === 'production') {
-    setupAdvancedProtection();
-    applyRunTimeProtection();
-  }
+    // Prevent Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C (Chrome, Firefox)
+    if ((e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c'))) {
+      e.preventDefault();
+      return false;
+    }
+    
+    // Prevent Ctrl+U (View source)
+    if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
+      e.preventDefault();
+      return false;
+    }
+    
+    return true;
+  });
+  
+  // Console warning and clearing
+  const warningMessage = 
+    'This site is protected. Using developer tools may result in your session being terminated.';
+  
+  console.clear();
+  console.log('%c', 'font-size:0;');
+  console.warn(warningMessage);
+  
+  // Add additional protection by overriding console methods
+  const consoleProtection = () => {
+    const originalConsole = { ...console };
+    console.log = function() {
+      originalConsole.log('%c', 'font-size:0;', ...arguments);
+    };
+    console.debug = function() {
+      originalConsole.debug('%c', 'font-size:0;', ...arguments);
+    };
+    console.info = function() {
+      originalConsole.info('%c', 'font-size:0;', ...arguments);
+    };
+    console.warn = function() {
+      originalConsole.warn('%c', 'font-size:0;', ...arguments);
+    };
+    console.error = function() {
+      originalConsole.error('%c', 'font-size:0;', ...arguments);
+    };
+    
+    setInterval(() => {
+      console.clear();
+      console.warn(warningMessage);
+    }, 2000);
+  };
+  
+  consoleProtection();
 };
