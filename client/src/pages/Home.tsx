@@ -215,8 +215,9 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-800 pb-24 md:pb-8">
-      {/* Gradient background instead of particles for better performance */}
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-dark-950 via-dark-900/90 to-[#1a103a] opacity-80"></div>
+      {/* Animated gradient background for smooth visual experience */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-dark-950 via-dark-900/90 to-[#1a103a] opacity-80 animate-gradient-slow bg-size-200"></div>
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent blur-3xl"></div>
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Welcome Banner with AnimatedTitle */}
         <ScrollReveal>

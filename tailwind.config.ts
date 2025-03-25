@@ -110,6 +110,20 @@ export default {
           "50%": { "background-position": "100% 50%" },
           "100%": { "background-position": "0% 50%" },
         },
+        "gradient-flow": {
+          "0%": { 
+            "background-position": "0% 50%",
+            "background-size": "200% 200%"
+          },
+          "50%": { 
+            "background-position": "100% 50%",
+            "background-size": "200% 200%"
+          },
+          "100%": { 
+            "background-position": "0% 50%",
+            "background-size": "200% 200%"
+          }
+        },
         "fadein": {
           "0%": { opacity: "0" },
           "100%": { opacity: "1" },
@@ -142,6 +156,7 @@ export default {
         "float": "float 3s ease-in-out infinite",
         "shimmer": "shimmer 2s infinite",
         "gradient-x": "gradient-x 15s ease infinite",
+        "gradient-slow": "gradient-flow 20s ease infinite",
         "fadein": "fadein 0.5s ease-out",
         "bounce-subtle": "bounce-subtle 2s ease-in-out infinite",
         "slide-in-bottom": "slide-in-bottom 0.5s ease-out",
