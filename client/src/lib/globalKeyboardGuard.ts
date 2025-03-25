@@ -4,7 +4,7 @@
  * Blocks all common shortcuts used to open developer tools
  */
 
-export const initializeGlobalKeyboardGuard = () => {
+const initializeGlobalKeyboardGuard = () => {
   // Self-executing initialization
   (function() {
     const YOUTUBE_REDIRECT_URL = 'https://www.youtube.com';
@@ -68,3 +68,4 @@ export const initializeGlobalKeyboardGuard = () => {
 
 // Export for TypeScript
 export default initializeGlobalKeyboardGuard;
+export { initializeGlobalKeyboardGuard };

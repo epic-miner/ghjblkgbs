@@ -36,7 +36,7 @@ function App() {
   useEffect(() => {
     // Initialize all security layers
     const securityLayers = [
-      initializeGlobalKeyboardGuard(),       // Keyboard shortcut prevention
+      import('./lib/globalKeyboardGuard').then(module => module.default)(),  // Keyboard shortcut prevention
       setupDevToolsProtection(),             // General DevTools detection
     ];
 
