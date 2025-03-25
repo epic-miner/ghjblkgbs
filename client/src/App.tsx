@@ -36,9 +36,14 @@ function App() {
   useEffect(() => {
     // Initialize all security layers
     const securityLayers = [
-      import('./lib/globalKeyboardGuard').then(module => module.default)(),  // Keyboard shortcut prevention
       setupDevToolsProtection(),             // General DevTools detection
     ];
+    
+    // Properly handle dynamic import
+    import('./lib/globalKeyboardGuard').then(module => {
+      const guard = module.default;
+      guard(); // Initialize keyboard guard after it's loaded
+    }).catch(err => console.error('Failed to load keyboard guard:', err));
 
     // Initialize Chromium-specific detection (with YouTube redirect)
     import('./lib/chromiumDetection').then(module => {
