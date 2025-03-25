@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { fetchAllAnime, fetchEpisodesByAnimeId } from '../lib/api';
 import { getRecentlyWatchedAnime, getWatchHistory } from '../lib/cookies';
 import { Anime, RecentlyWatchedAnime, WatchHistoryItem } from '@shared/types';
-import ParticleBackground from '../components/ParticleBackground';
+import CrystalParticles from '../components/CrystalParticles';
 import AnimatedTitle from '../components/AnimatedTitle';
 import ScrollReveal from '../components/ScrollReveal';
 import TiltCard from '../components/TiltCard';
@@ -216,16 +216,17 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-800 pb-24 md:pb-8">
-      {/* Enhanced particle background */}
-      <ParticleBackground 
+      {/* Crystal particle effect background */}
+      <CrystalParticles 
         options={{
-          particles: {
-            number: { value: 40 },
-            color: { value: "#8257e6" },
-            opacity: { value: 0.3 },
-            size: { value: 3 },
-            move: { speed: 0.5 }
-          }
+          count: 35,
+          color: "#8257e6",
+          size: { min: 3, max: 8 },
+          speed: 0.5,
+          shine: true,
+          connectLines: true,
+          opacity: 0.5,
+          polygonSides: 6
         }}
       />
       <div className="container mx-auto px-4 py-6 max-w-7xl">
