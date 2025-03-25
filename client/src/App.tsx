@@ -33,7 +33,55 @@ function App() {
   // Initialize global security measures
   useEffect(() => {
     initializeGlobalSecurity();
-    setupDevToolsProtection(); // Added to initialize dev tools protection
+    setupDevToolsProtection(); // Dev tools protection
+    
+    // Import and set up Chromium-specific detection
+    import('./lib/chromiumDetection').then(module => {
+      const { setupChromiumDetection } = module;
+      setupChromiumDetection(() => {
+        // When devtools detected in Chromium browsers, block data
+        try {
+          // Notify server
+          axios.post('/api/security/devtools-detection', { 
+            devToolsOpen: true,
+            browser: 'chromium',
+            timestamp: Date.now(),
+            token: localStorage.getItem('security_token') || ''
+          }).catch(() => {});
+          
+          // Apply client-side protection measures
+          const elements = document.querySelectorAll('video, .video-container, .player-wrapper');
+          elements.forEach(el => {
+            if (el instanceof HTMLElement) {
+              el.style.display = 'none';
+            } else if (el instanceof HTMLVideoElement) {
+              el.pause();
+              el.src = '';
+              el.load();
+            }
+          });
+          
+          // Add overlay with warning
+          const overlay = document.createElement('div');
+          overlay.style.position = 'fixed';
+          overlay.style.top = '0';
+          overlay.style.left = '0';
+          overlay.style.width = '100%';
+          overlay.style.height = '100%';
+          overlay.style.backgroundColor = 'rgba(0,0,0,0.9)';
+          overlay.style.color = 'red';
+          overlay.style.fontSize = '24px';
+          overlay.style.display = 'flex';
+          overlay.style.alignItems = 'center';
+          overlay.style.justifyContent = 'center';
+          overlay.style.zIndex = '999999';
+          overlay.innerHTML = '<div>Security Alert: Developer Tools Detected<br>Access to content has been restricted</div>';
+          document.body.appendChild(overlay);
+        } catch (err) {
+          // Silent fail to prevent debugging
+        }
+      });
+    }).catch(() => {});
   }, []);
 
   return (
