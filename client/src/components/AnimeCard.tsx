@@ -102,18 +102,19 @@ const AnimeCard = memo(({
           <LazyLoadImage
             src={anime.thumbnail_url}
             alt={sanitizedTitle}
-            className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110 lazy-image-blur-effect"
+            className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
             afterLoad={() => {
               // Image is loaded, can perform additional actions here if needed
               console.log(`Image loaded: ${sanitizedTitle}`);
             }}
-            effect="opacity" // Smoother opacity transition
-            threshold={200} // Load images 200px before they appear on screen
+            effect="opacity" // Pure opacity for better quality
+            threshold={300} // Load images earlier for better perceived performance
             wrapperClassName="w-full h-full lazy-image-wrapper"
             placeholder={
               <div className="w-full h-full image-loading-placeholder" />
             }
             onError={handleImageError}
+            placeholderSrc={anime.thumbnail_url + '?width=20'} // Tiny version for instant display
             width={300}
             height={450}
           />

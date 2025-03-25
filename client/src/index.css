@@ -59,8 +59,12 @@
 }
 
 .lazy-image-blur-effect {
-  filter: blur(5px);
-  transition: filter 0.3s ease-out;
+  filter: blur(2px); /* Reduced blur for sharper initial appearance */
+  transition: filter 0.2s ease-out;
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+  -webkit-transform: translate3d(0, 0, 0);
+  -moz-transform: translate3d(0, 0, 0);
 }
 
 .lazy-image-loaded {
