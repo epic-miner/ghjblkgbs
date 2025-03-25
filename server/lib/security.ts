@@ -164,3 +164,35 @@ const disableConsole = () => {
     // Silent fail for unsupported browsers
   }
 };
+
+export const preventKeyboardShortcuts = () => {
+  // Use capture phase to intercept events before they reach other handlers
+  window.addEventListener('keydown', (e: KeyboardEvent) => {
+    // Prevent F12
+    if (e.key === 'F12') {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+
+    // Prevent ALL dev tools keyboard shortcuts
+    if (e.ctrlKey && e.shiftKey && (
+        e.key === 'I' || e.key === 'i' || // Chrome, Firefox, Edge Inspector
+        e.key === 'J' || e.key === 'j' || // Chrome Console
+        e.key === 'C' || e.key === 'c' || // Chrome Elements
+        e.key === 'K' || e.key === 'k' || // Chrome Network
+        e.key === 'M' || e.key === 'm'    // Chrome Developer Tools (general)
+      )) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+
+    // Prevent Safari dev tools (Cmd+Opt+I)
+    if ((e.metaKey || e.ctrlKey) && e.altKey && (e.key === 'I' || e.key === 'i')) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  }, true);
+};

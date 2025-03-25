@@ -12,6 +12,7 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { ColorSchemeProvider } from './contexts/ColorSchemeContext';
 import Footer from './components/Footer'; // Added import for Footer component
+import './lib/globalKeyboardGuard'; //Import global keyboard guard
 
 // Lazy load page components for better performance and code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -30,11 +31,32 @@ const queryClient = new QueryClient();
 
 function App() {
   useConsoleProtection();
+  // Add global keyboard event listener at the document level
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Block Ctrl+Shift+I and other dev tools shortcuts at document level (highest priority)
+      if ((e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) || 
+          (e.key === 'F12') || 
+          (e.ctrlKey && e.altKey && (e.key === 'I' || e.key === 'i'))) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    };
+
+    // Add listeners with capture phase to ensure they execute first
+    document.addEventListener('keydown', handleKeyDown, true);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+    };
+  }, []);
+
   // Initialize global security measures
   useEffect(() => {
     initializeGlobalSecurity();
     setupDevToolsProtection(); // Dev tools protection
-    
+
     // Import and set up Chromium-specific detection
     import('./lib/chromiumDetection').then(module => {
       const { setupChromiumDetection } = module;
@@ -48,7 +70,7 @@ function App() {
             timestamp: Date.now(),
             token: localStorage.getItem('security_token') || ''
           }).catch(() => {});
-          
+
           // Apply client-side protection measures
           const elements = document.querySelectorAll('video, .video-container, .player-wrapper');
           elements.forEach(el => {
@@ -60,7 +82,7 @@ function App() {
               el.load();
             }
           });
-          
+
           // Add overlay with warning
           const overlay = document.createElement('div');
           overlay.style.position = 'fixed';
@@ -77,7 +99,7 @@ function App() {
           overlay.style.zIndex = '999999';
           overlay.innerHTML = '<div>Security Alert: Developer Tools Detected<br>Access to content has been restricted</div>';
           document.body.appendChild(overlay);
-          
+
           // Also inform the server that DevTools are open
           try {
             axios.post('/api/security/devtools-detection', { 

@@ -134,9 +134,59 @@ export const setupDevToolsProtection = () => {
     sendHeartbeat();
   }
 
+  // Enhanced keyboard shortcut prevention
+  const preventDevToolsShortcuts = () => {
+    window.addEventListener('keydown', (e) => {
+      // Prevent Ctrl+Shift+I (Chrome, Edge, Firefox)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+      
+      // Prevent Ctrl+Shift+J (Chrome DevTools Console)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+      
+      // Prevent Ctrl+Shift+C (Chrome DevTools Elements)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+      
+      // Prevent F12 key
+      if (e.key === 'F12') {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+      
+      // Prevent Ctrl+Alt+I (Safari)
+      if (e.ctrlKey && e.altKey && (e.key === 'I' || e.key === 'i')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    }, true);
+    
+    // Use the capture phase to intercept events before they reach other handlers
+    document.addEventListener('contextmenu', (e) => {
+      // Additional prevention for right-click context menu which may have "Inspect" option
+      e.preventDefault();
+      return false;
+    }, true);
+  };
+
   // Request verification token from server on page load
   const initSecurity = async () => {
     try {
+      // Apply keyboard shortcut prevention
+      preventDevToolsShortcuts();
+      
       const response = await axios.get('/api/security/token');
       if (response.data && response.data.token) {
         localStorage.setItem('security_token', response.data.token);
